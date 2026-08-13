@@ -1,0 +1,24 @@
+services:
+  todo_db:
+    image: postgres:15-alpine
+    env_file:
+      - .env
+    ports:
+      - "5424:5432"
+    volumes:
+      - todo_postgres_data:/var/lib/postgresql/data
+
+  todo_api:
+    build:
+      context: .
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - todo_db
+
+volumes:
+  todo_postgres_data:
