@@ -1,10 +1,15 @@
 from fastapi import FastAPI
 
-app = FastAPI()
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+from api.v1.api import api_router
+from db.session import engine, Base
+from models.task import Task
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str = None):
-    return {"item_id": item_id, "q": q}
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(
+    title="TODO List API",
+    description="REST API для управління завданнями",
+    version="1.0.0"
+)
+
+app.include_router(api_router, prefix="/api/v1")
