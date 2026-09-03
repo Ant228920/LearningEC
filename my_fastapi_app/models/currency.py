@@ -6,6 +6,6 @@ class Currency(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    symbol = Column(String, nullable=False)
+    symbol = Column(String, nullable=True)
     code = Column(String, unique=True, nullable=False, index=True)
     rate = Column(Float, nullable=False)

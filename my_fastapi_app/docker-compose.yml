@@ -27,5 +27,22 @@ services:
       currency_db:
         condition: service_healthy
 
+  currency_cron:
+    build:
+      context: .
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - ./crontab:/etc/cron.d/currency-cron
+    depends_on:
+      currency_db:
+        condition: service_healthy
+    command: >
+      bash -c "apt-get update && apt-get install -y cron 
+      && chmod 0644 /etc/cron.d/currency-cron 
+      && crontab /etc/cron.d/currency-cron 
+      && cron -f"
+
 volumes:
   currency_postgres_data:
