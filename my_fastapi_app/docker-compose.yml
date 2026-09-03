@@ -1,14 +1,20 @@
 services:
-  todo_db:
+  currency_db:
+    container_name: currency_db
     image: postgres:15-alpine
     env_file:
       - .env
     ports:
       - "5424:5432"
     volumes:
-      - todo_postgres_data:/var/lib/postgresql/data
+      - currency_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  todo_api:
+  currency_api:
     build:
       context: .
     env_file:
@@ -18,7 +24,8 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - todo_db
+      currency_db:
+        condition: service_healthy
 
 volumes:
-  todo_postgres_data:
+  currency_postgres_data:
