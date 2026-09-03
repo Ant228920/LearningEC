@@ -48,3 +48,4 @@ htmlcov/
 
 .DS_Store
 Thumbs.db
+/my_fastapi_app/.env
