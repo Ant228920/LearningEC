@@ -1,35 +1,38 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from db.session import get_db
-from repository.currency_repository import CurrencyRepository
+import httpx
+from fastapi import APIRouter, HTTPException, Query
 from schemas.schema import ConvertResponse
 
 router = APIRouter()
 
 
 @router.get("/api/convert", response_model=ConvertResponse)
-def convert_currency(
+async def convert_currency(
         amount: float = Query(..., gt=0, description="Сума для конвертації"),
         from_currency: str = Query(..., min_length=3, max_length=3),
-        to_currency: str = Query(..., min_length=3, max_length=3),
-        db: Session = Depends(get_db)
+        to_currency: str = Query(..., min_length=3, max_length=3)
 ):
-    repo = CurrencyRepository(db)
-
     from_code = from_currency.upper()
     to_code = to_currency.upper()
 
-    # Шукаємо валюти у власній базі даних (включно з UAH)
-    curr_from = repo.get_by_code(from_code)
-    curr_to = repo.get_by_code(to_code)
+    url = "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json"
 
-    if not curr_from:
-        raise HTTPException(status_code=404, detail=f"Валюту {from_code} не знайдено в базі")
-    if not curr_to:
-        raise HTTPException(status_code=404, detail=f"Валюту {to_code} не знайдено в базі")
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
 
-    # Рахуємо крос-курс на основі даних з БД
-    cross_rate = curr_from.rate / curr_to.rate
+    if response.status_code != 200:
+        raise HTTPException(status_code=502, detail="Помилка зв'язку з API НБУ")
+
+    nbu_data = response.json()
+
+    rates = {item["cc"]: item["rate"] for item in nbu_data}
+    rates["UAH"] = 1.0
+
+    if from_code not in rates:
+        raise HTTPException(status_code=404, detail=f"Валюту {from_code} не знайдено")
+    if to_code not in rates:
+        raise HTTPException(status_code=404, detail=f"Валюту {to_code} не знайдено")
+
+    cross_rate = rates[from_code] / rates[to_code]
     converted = amount * cross_rate
 
     return {
