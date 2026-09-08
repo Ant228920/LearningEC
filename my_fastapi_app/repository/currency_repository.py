@@ -16,14 +16,8 @@ class CurrencyRepository:
 
         stmt = insert(Currency).values(currencies_data)
 
-        update_dict = {
-            "rate": stmt.excluded.rate,
-            "name": stmt.excluded.name,
-        }
-
         on_conflict_stmt = stmt.on_conflict_do_update(
             index_elements=['code'],
-            set_=update_dict
         )
 
         self._db.execute(on_conflict_stmt)

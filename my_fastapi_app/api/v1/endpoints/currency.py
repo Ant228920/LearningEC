@@ -1,38 +1,36 @@
-import httpx
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
+from sqlalchemy.orm import Session
 from schemas.schema import ConvertResponse
+from db.session import get_db
+from repository.currency_repository import CurrencyRepository
 
 router = APIRouter()
 
 
 @router.get("/api/convert", response_model=ConvertResponse)
-async def convert_currency(
+def convert_currency(
         amount: float = Query(..., gt=0, description="Сума для конвертації"),
         from_currency: str = Query(..., min_length=3, max_length=3),
-        to_currency: str = Query(..., min_length=3, max_length=3)
+        to_currency: str = Query(..., min_length=3, max_length=3),
+        db: Session = Depends(get_db)
 ):
     from_code = from_currency.upper()
     to_code = to_currency.upper()
 
-    url = "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json"
+    repo = CurrencyRepository(db)
 
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
+    def get_rate(code: str) -> float:
 
-    if response.status_code != 200:
-        raise HTTPException(status_code=502, detail="Помилка зв'язку з API НБУ")
+        currency = repo.get_by_code(code)
+        if not currency:
+            raise HTTPException(status_code=404, detail=f"Валюту {code} не знайдено в базі")
 
-    nbu_data = response.json()
+        return float(currency.rate)
 
-    rates = {item["cc"]: item["rate"] for item in nbu_data}
-    rates["UAH"] = 1.0
+    from_rate = get_rate(from_code)
+    to_rate = get_rate(to_code)
 
-    if from_code not in rates:
-        raise HTTPException(status_code=404, detail=f"Валюту {from_code} не знайдено")
-    if to_code not in rates:
-        raise HTTPException(status_code=404, detail=f"Валюту {to_code} не знайдено")
-
-    cross_rate = rates[from_code] / rates[to_code]
+    cross_rate = from_rate / to_rate
     converted = amount * cross_rate
 
     return {
