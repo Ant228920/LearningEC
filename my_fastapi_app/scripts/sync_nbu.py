@@ -1,9 +1,36 @@
+# scripts/sync_nbu.py
 import sys
 import httpx
 from sqlalchemy.orm import Session
 
 from db.session import SessionLocal
 from repository.currency_repository import CurrencyRepository
+
+CURRENCY_SYMBOLS = {
+    "USD": "$",
+    "EUR": "€",
+    "GBP": "£",
+    "PLN": "zł",
+}
+BLOCKED_CURRENCIES = {"RUB", "BYN"}
+
+
+def parse_currency_item(item: dict) -> dict | None:
+    code = item.get("cc", "")
+    name = item.get("txt")
+    rate = item.get("rate")
+
+    if not (code and name and rate is not None):
+        return None
+    if len(code) != 3 or not code.isupper() or code in BLOCKED_CURRENCIES:
+        return None
+
+    return {
+        "code": code,
+        "name": name,
+        "rate": float(rate),
+        "symbol": CURRENCY_SYMBOLS.get(code, "")
+    }
 
 
 def sync_currencies():
@@ -20,31 +47,10 @@ def sync_currencies():
         return False
 
     currencies_data = []
-
     for item in nbu_data:
-        code = item.get("cc")
-        name = item.get("txt")
-        rate = item.get("rate")
-
-        if code and name and rate is not None:
-            if len(code) == 3 and code.isupper():
-                if code not in ["RUB", "BYN"]:
-                    symbol = ""
-                    if code == "USD":
-                        symbol = "$"
-                    elif code == "EUR":
-                        symbol = "€"
-                    elif code == "GBP":
-                        symbol = "£"
-                    elif code == "PLN":
-                        symbol = "zł"
-
-                    currencies_data.append({
-                        "code": code,
-                        "name": name,
-                        "rate": float(rate),
-                        "symbol": symbol
-                    })
+        parsed = parse_currency_item(item)
+        if parsed:
+            currencies_data.append(parsed)
 
     currencies_data.append({
         "code": "UAH",
