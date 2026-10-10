@@ -1,0 +1,48 @@
+services:
+  currency_db:
+    container_name: currency_db
+    image: postgres:15-alpine
+    env_file:
+      - .env
+    ports:
+      - "5424:5432"
+    volumes:
+      - currency_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  currency_api:
+    build:
+      context: .
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      currency_db:
+        condition: service_healthy
+
+  currency_cron:
+    build:
+      context: .
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - ./crontab:/etc/cron.d/currency-cron
+    depends_on:
+      currency_db:
+        condition: service_healthy
+    command: >
+      bash -c "apt-get update && apt-get install -y cron 
+      && chmod 0644 /etc/cron.d/currency-cron 
+      && crontab /etc/cron.d/currency-cron 
+      && cron -f"
+
+volumes:
+  currency_postgres_data:
