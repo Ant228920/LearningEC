@@ -2,6 +2,7 @@ import pytest
 import httpx
 from unittest.mock import patch, MagicMock
 from core.resilience_service import get_external_rate_with_fallback, FALLBACK_RATES
+from scripts.sync_nbu import parse_currency_item
 
 
 def test_upstream_success():
@@ -28,7 +29,7 @@ def test_resilience_on_http_500_error():
     mock_resp.raise_for_status.side_effect = http_error
 
     with patch("httpx.Client.get", return_value=mock_resp) as mock_get, \
-         patch("time.sleep", return_value=None):  # мокаємо sleep, щоб тест пройшов миттєво
+         patch("time.sleep", return_value=None):
 
         rate, is_fallback = get_external_rate_with_fallback(
             code="GBP",
@@ -56,3 +57,4 @@ def test_resilience_on_timeout():
         assert mock_get.call_count == 3
         assert is_fallback is True
         assert rate == FALLBACK_RATES["EUR"]
+

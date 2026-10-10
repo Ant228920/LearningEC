@@ -28,17 +28,13 @@ export const options = {
   scenarios: {
     load_test: scenarios[MODE],
   },
-  // Автоматичні пороги SLO
   thresholds: {
-    // 95% запитів мають виконуватися швидше ніж 200 мс
     http_req_duration: ['p(95)<200'],
-    // Відсоток помилок має бути менше 1%
     http_req_failed: ['rate<0.01'],
   },
 };
 
 export default function () {
-  // Передаємо обов'язкові query-параметри
   const url = 'http://localhost:8000/api/v1/tasks/api/convert?amount=100&from_currency=UAH&to_currency=EUR';
 
   const res = http.get(url);
