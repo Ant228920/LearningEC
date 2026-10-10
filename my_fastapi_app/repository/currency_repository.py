@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy.dialects.postgresql import insert
 from models.currency import Currency
 
-
 class CurrencyRepository:
     def __init__(self, db: Session):
         self._db = db
