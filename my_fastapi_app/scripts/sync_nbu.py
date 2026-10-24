@@ -15,6 +15,8 @@ CURRENCY_SYMBOLS = {
 BLOCKED_CURRENCIES = {"RUB", "BYN"}
 
 
+
+
 def parse_currency_item(item: dict) -> dict | None:
     code = item.get("cc", "")
     name = item.get("txt")

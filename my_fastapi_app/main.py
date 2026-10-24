@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 
 from api.api import api_router
+from api.v1.endpoints.privacy import privacy_router
 from core.secure_logger import setup_secure_logging
 from db.session import engine, Base
+from models import users
 import logging
 
 Base.metadata.create_all(bind=engine)
@@ -14,6 +16,7 @@ app = FastAPI(
 )
 
 app.include_router(api_router, prefix="/api/v1")
+app.include_router(privacy_router, prefix="/api/v1")
 
 logger = logging.getLogger("api")
 
