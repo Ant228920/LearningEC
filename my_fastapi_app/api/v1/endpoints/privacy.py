@@ -24,10 +24,6 @@ logger = logging.getLogger("api")
 privacy_router = APIRouter(prefix="/users", tags=["Privacy & GDPR"])
 
 
-# ==========================================
-# Policy Gate Component (Завдання 4)
-# ==========================================
-
 class ConsentPolicyGate:
     """Перевірка активної згоди перед виконанням бізнес-дії."""
 
@@ -44,11 +40,6 @@ class ConsentPolicyGate:
         )
         return consent is not None
 
-
-# ==========================================
-# Завдання 2: Personal Data Export (Article 15)
-# ==========================================
-
 @privacy_router.get(
     "/{user_id}/personal-data",
     response_model=PersonalDataExportResponse,
@@ -60,7 +51,6 @@ def export_user_personal_data(
     x_user_id: int = Header(..., description="ID авторизованого користувача"),
     db: Session = Depends(get_db),
 ):
-    # 1. Захист від IDOR та Enumeration
     if user_id != x_user_id:
         logger.warning("Access denied: Actor %s tried to export data of User %s", x_user_id, user_id)
         raise HTTPException(
@@ -68,7 +58,6 @@ def export_user_personal_data(
             detail="Access denied: You are not authorized to export another user's data.",
         )
 
-    # 2. Отримання даних із БД
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
@@ -76,7 +65,6 @@ def export_user_personal_data(
     db_activities = db.query(UserActivity).filter(UserActivity.user_id == user_id).all()
     db_consents = db.query(UserConsent).filter(UserConsent.user_id == user_id).all()
 
-    # 3. Мінімізація: віддаються тільки безпечні поля
     profile = UserProfileExport(
         user_id=user.id,
         email=user.email,
@@ -124,11 +112,6 @@ def export_user_personal_data(
         consents=consents,
     )
 
-
-# ==========================================
-# Завдання 3: Right to Erasure / Anonymization (Article 17)
-# ==========================================
-
 @privacy_router.post(
     "/{user_id}/anonymize",
     response_model=AnonymizeResponse,
@@ -150,7 +133,6 @@ def anonymize_user_data(
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
 
-    # Ідемпотентність
     if user.is_anonymized:
         return AnonymizeResponse(
             status="success",
@@ -160,7 +142,6 @@ def anonymize_user_data(
         )
 
     try:
-        # Анонімізація прямих ідентифікаторів у таблиці users
         user.email = f"deleted_user_{user_id}@anon.local"
         user.username = f"deleted_user_{user_id}"
         user.phone = None
@@ -168,7 +149,6 @@ def anonymize_user_data(
         user.internal_antifraud_score = None
         user.is_anonymized = True
 
-        # Знеособлення непрямих ідентифікаторів (IP) в user_activities
         activities = db.query(UserActivity).filter(UserActivity.user_id == user_id).all()
         for act in activities:
             if act.details:
@@ -180,7 +160,6 @@ def anonymize_user_data(
                 except Exception:
                     pass
 
-        # Деактивація активних згод
         consents = db.query(UserConsent).filter(UserConsent.user_id == user_id).all()
         for c in consents:
             c.is_granted = False
@@ -204,11 +183,6 @@ def anonymize_user_data(
         user_id=user_id,
         anonymized_at=datetime.now(timezone.utc).isoformat(),
     )
-
-
-# ==========================================
-# Завдання 4: Consent Management Engine (Article 7)
-# ==========================================
 
 @privacy_router.post("/{user_id}/consents/grant", response_model=ConsentActionResponse)
 def grant_consent(

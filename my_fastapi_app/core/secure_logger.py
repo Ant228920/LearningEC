@@ -7,6 +7,7 @@ PHONE_REGEX = re.compile(r'(\+?\d{2,3})\d{3,6}(\d{4})')
 SECRET_REGEX = re.compile(
     r'(?i)(password|token|secret|api_key|access_token|authorization)(["\']?\s*[:=]\s*["\']?)([^"\'\s,}{]+)',
 )
+SENSITIVE_KEYS = ("password", "secret", "token", "api_key")
 
 
 def mask_email(match: re.Match) -> str:
@@ -19,6 +20,16 @@ def mask_phone(match: re.Match) -> str:
 
 def mask_secret(match: re.Match) -> str:
     return f"{match.group(1)}{match.group(2)}[REDACTED]"
+
+
+def format_safe_field(key: str, value: str, max_len: int = 120) -> str:
+    clean_key = key.lower()
+    if clean_key in SENSITIVE_KEYS or "auth" in clean_key:
+        return clean_key + "=[REDACTED]"
+    if len(value) > max_len and max_len > 10:
+        cutoff = max_len - 3
+        return clean_key + "=" + value[:cutoff] + "..."
+    return clean_key + "=" + value
 
 
 def sanitize_message(message: Any) -> Any:
