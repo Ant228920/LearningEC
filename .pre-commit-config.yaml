@@ -3,3 +3,11 @@ repos:
     rev: v8.18.2
     hooks:
       - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: radon-cc-gate
+        name: Radon Cyclomatic Complexity Gate (CC <= 10)
+        entry: python check_cc.py
+        language: system
+        types: [python]
