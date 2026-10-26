@@ -11,6 +11,11 @@ CURRENCY_SYMBOLS = {
     "EUR": "€",
     "GBP": "£",
     "PLN": "zł",
+    "CHF": "₣",
+    "JPY": "¥",
+    "CAD": "C$",
+    "AUD": "A$",
+    "CZK": "Kč",
 }
 BLOCKED_CURRENCIES = {"RUB", "BYN"}
 
@@ -18,41 +23,26 @@ BLOCKED_CURRENCIES = {"RUB", "BYN"}
 
 
 def parse_currency_item(item: dict) -> dict | None:
-    code = item.get("cc", "")
+    code = str(item.get("cc", ""))
     name = item.get("txt")
     rate = item.get("rate")
 
-    if not (code and name and rate is not None):
+    validation_rules = (
+        bool(item.get("cc")),
+        bool(name),
+        rate is not None,
+        len(code) == 3,
+        code.isupper(),
+        code not in BLOCKED_CURRENCIES,
+    )
+    if not all(validation_rules):
         return None
-    if len(code) != 3 or not code.isupper() or code in BLOCKED_CURRENCIES:
-        return None
-
-    if code == "USD":
-        symbol = "$"
-    elif code == "EUR":
-        symbol = "€"
-    elif code == "GBP":
-        symbol = "£"
-    elif code == "PLN":
-        symbol = "zł"
-    elif code == "CHF":
-        symbol = "₣"
-    elif code == "JPY":
-        symbol = "¥"
-    elif code == "CAD":
-        symbol = "C$"
-    elif code == "AUD":
-        symbol = "A$"
-    elif code == "CZK":
-        symbol = "Kč"
-    else:
-        symbol = ""
 
     return {
         "code": code,
         "name": name,
         "rate": float(rate),
-        "symbol": symbol
+        "symbol": CURRENCY_SYMBOLS.get(code, ""),
     }
 
 
