@@ -27,11 +27,32 @@ def parse_currency_item(item: dict) -> dict | None:
     if len(code) != 3 or not code.isupper() or code in BLOCKED_CURRENCIES:
         return None
 
+    if code == "USD":
+        symbol = "$"
+    elif code == "EUR":
+        symbol = "€"
+    elif code == "GBP":
+        symbol = "£"
+    elif code == "PLN":
+        symbol = "zł"
+    elif code == "CHF":
+        symbol = "₣"
+    elif code == "JPY":
+        symbol = "¥"
+    elif code == "CAD":
+        symbol = "C$"
+    elif code == "AUD":
+        symbol = "A$"
+    elif code == "CZK":
+        symbol = "Kč"
+    else:
+        symbol = ""
+
     return {
         "code": code,
         "name": name,
         "rate": float(rate),
-        "symbol": CURRENCY_SYMBOLS.get(code, "")
+        "symbol": symbol
     }
 
 
