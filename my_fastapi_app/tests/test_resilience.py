@@ -1,7 +1,9 @@
 import pytest
 import httpx
 from unittest.mock import patch, MagicMock
-from core.resilience_service import get_external_rate_with_fallback, FALLBACK_RATES
+from core.resilience_service import (
+    get_external_rate_with_fallback, FALLBACK_RATES, RateRequest, RetryPolicy,
+)
 from scripts.sync_nbu import parse_currency_item
 
 
@@ -12,9 +14,8 @@ def test_upstream_success():
 
     with patch("httpx.Client.get", return_value=mock_resp) as mock_get:
         rate, is_fallback = get_external_rate_with_fallback(
-            code="GBP",
-            provider_url="http://upstream-service/rate",
-            max_retries=3
+            RateRequest(code="GBP", provider_url="http://upstream-service/rate"),
+            RetryPolicy(max_retries=3),
         )
 
         assert rate == 0.85
@@ -32,9 +33,8 @@ def test_resilience_on_http_500_error():
          patch("time.sleep", return_value=None):
 
         rate, is_fallback = get_external_rate_with_fallback(
-            code="GBP",
-            provider_url="http://upstream-service/rate",
-            max_retries=3
+            RateRequest(code="GBP", provider_url="http://upstream-service/rate"),
+            RetryPolicy(max_retries=3),
         )
 
         assert mock_get.call_count == 3
@@ -49,12 +49,10 @@ def test_resilience_on_timeout():
          patch("time.sleep", return_value=None):
 
         rate, is_fallback = get_external_rate_with_fallback(
-            code="EUR",
-            provider_url="http://upstream-service/rate",
-            max_retries=3
+            RateRequest(code="EUR", provider_url="http://upstream-service/rate"),
+            RetryPolicy(max_retries=3),
         )
 
         assert mock_get.call_count == 3
         assert is_fallback is True
         assert rate == FALLBACK_RATES["EUR"]
-

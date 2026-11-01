@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from schemas.schema import ConvertResponse
 from db.session import get_db
 from repository.currency_repository import CurrencyRepository
-from core.resilience_service import get_external_rate_with_fallback
+from core.resilience_service import get_external_rate_with_fallback, RateRequest
 
 router = APIRouter()
 
@@ -29,7 +29,7 @@ def convert_currency(
         if currency:
             return float(currency.rate)
 
-        rate, used_fallback = get_external_rate_with_fallback(code, UPSTREAM_PROVIDER_URL)
+        rate, used_fallback = get_external_rate_with_fallback(RateRequest(code, UPSTREAM_PROVIDER_URL))
         if used_fallback:
             is_degraded = True
         return rate
