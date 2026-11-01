@@ -14,7 +14,7 @@ import httpx
 import pytest
 
 from core import resilience_service
-from core.resilience_service import get_external_rate_with_fallback
+from core.resilience_service import get_external_rate_with_fallback, RateRequest, RetryPolicy
 
 PROVIDER_URL = "http://upstream-service/rate"
 BASE_EUR_RATE = 0.92
@@ -32,9 +32,8 @@ def fetch_eur_fallback_rate():
     with patch("httpx.Client.get", side_effect=httpx.ConnectTimeout("provider down")), \
          patch("time.sleep", return_value=None):
         rate, is_fallback = get_external_rate_with_fallback(
-            code="EUR",
-            provider_url=PROVIDER_URL,
-            max_retries=3,
+            RateRequest(code="EUR", provider_url=PROVIDER_URL),
+            RetryPolicy(max_retries=3),
         )
     assert is_fallback is True
     return rate
