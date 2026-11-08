@@ -1,8 +1,9 @@
-"""Експортери персональних даних: ієрархія наслідування (Лаб. №8, Завд. 3, BASELINE).
+"""Експортери персональних даних: КОМПОЗИЦІЯ замість наслідування (Лаб. №8, Завд. 3, PASS).
 
-Штучна трирівнева ієрархія (за приміткою методички) для демонстрації антипатерну
-Inheritance Hell:  BaseExporter -> JsonExporter -> GdprJsonExporter.
-Нащадки перевизначають більшість методів і переписують частину батьківської логіки.
+Було:  BaseExporter -> JsonExporter -> GdprJsonExporter   (extends, DIT=3, 7 перевизначень)
+Стало: JsonExporter ВОЛОДІЄ BaseExporter, GdprJsonExporter ВОЛОДІЄ JsonExporter
+       (приватне поле, Dependency Injection через конструктор, делегування викликів).
+Зміна в «батьківському» класі більше не ламає «нащадків» автоматично.
 """
 import json
 import logging
@@ -14,7 +15,7 @@ logger = logging.getLogger("api")
 
 
 class BaseExporter:
-    """Рівень 1: шаблонний метод export() та хуки, які перевизначають нащадки."""
+    """Базовий компонент: завантаження даних та сирий payload. Більше нікого не «успадковує»."""
 
     def __init__(self, users: UserStore, consents: ConsentStore):
         self._users = users
@@ -67,11 +68,34 @@ class BaseExporter:
         logger.info("Export generated: subject_id=%s", user_id)
 
 
-class JsonExporter(BaseExporter):
-    """Рівень 2: JSON-формат. Перевизначає 4 методи, додає 2."""
+class JsonExporter:
+    """JSON-формат. Тримає BaseExporter у приватному полі та делегує йому завантаження даних."""
 
-    def build_payload(self, profile: Dict[str, Any], activities: List, consents: List) -> Dict[str, Any]:
-        payload = super().build_payload(profile, activities, consents)
+    def __init__(self, base: BaseExporter):
+        self._base = base
+
+    def export(self, user_id: int) -> str:
+        self._base.validate_subject(user_id)
+        bundle = {
+            "profile": self._base.load_profile(user_id),
+            "activities": self._base.load_activities(user_id),
+            "consents": self._base.load_consents(user_id),
+        }
+        payload = self.build_payload(bundle)
+        self._base.audit(user_id)
+        return self.serialize(payload)
+
+    def load_profile(self, user_id: int) -> Dict[str, Any]:
+        return self._base.load_profile(user_id)
+
+    def load_activities(self, user_id: int) -> List[Dict[str, Any]]:
+        return self._base.load_activities(user_id)
+
+    def load_consents(self, user_id: int) -> List[Dict[str, Any]]:
+        return self._base.load_consents(user_id)
+
+    def build_payload(self, bundle: Dict[str, Any]) -> Dict[str, Any]:
+        payload = self._base.build_payload(bundle)
         payload["format"] = "json"
         return payload
 
@@ -91,28 +115,22 @@ class JsonExporter(BaseExporter):
         return json.loads(text)
 
 
-class GdprJsonExporter(JsonExporter):
-    """Рівень 3: GDPR Art. 15. Перевизначає 7 методів і переписує половину батьківської логіки."""
+class GdprJsonExporter:
+    """GDPR Art. 15. Тримає JsonExporter (завантаження) і UserStore (перевірка суб'єкта) як залежності."""
 
-    def validate_subject(self, user_id: int) -> None:
-        user = self._users.get(user_id)
-        if user is None or user.is_anonymized:
-            raise UserNotFound(user_id)
+    def __init__(self, json_exporter: JsonExporter, users: UserStore):
+        self._json = json_exporter
+        self._users = users
 
-    def load_profile(self, user_id: int) -> Dict[str, Any]:
-        profile = super().load_profile(user_id)
-        profile["phone"] = "***" if profile["phone"] else None
-        return profile
-
-    def build_payload(self, profile: Dict[str, Any], activities: List, consents: List) -> Dict[str, Any]:
-        return {
+    def export(self, user_id: int) -> str:
+        self._ensure_exportable(user_id)
+        payload = {
             "export_metadata": {"schema_version": self.schema_version(), "legal_basis": self.legal_basis()},
-            "profile": profile,
-            "activity_history": activities,
-            "consents": consents,
+            "profile": self._masked_profile(user_id),
+            "activity_history": self._json.load_activities(user_id),
+            "consents": self._json.load_consents(user_id),
         }
-
-    def serialize(self, payload: Dict[str, Any]) -> str:
+        logger.info("GDPR Art.15 export generated for subject_id=%s", user_id)
         return json.dumps(payload, ensure_ascii=False, sort_keys=True)
 
     def content_type(self) -> str:
@@ -121,14 +139,21 @@ class GdprJsonExporter(JsonExporter):
     def file_name(self, user_id: int) -> str:
         return f"gdpr_export_{user_id}.json"
 
-    def audit(self, user_id: int) -> None:
-        logger.info("GDPR Art.15 export generated for subject_id=%s", user_id)
-
     def schema_version(self) -> str:
         return "1.0"
 
     def legal_basis(self) -> str:
         return "GDPR Article 15 (Right of Access)"
+
+    def _ensure_exportable(self, user_id: int) -> None:
+        user = self._users.get(user_id)
+        if user is None or user.is_anonymized:
+            raise UserNotFound(user_id)
+
+    def _masked_profile(self, user_id: int) -> Dict[str, Any]:
+        profile = self._json.load_profile(user_id)
+        profile["phone"] = "***" if profile["phone"] else None
+        return profile
 
 
 def make_base_exporter(users: UserStore, consents: ConsentStore) -> BaseExporter:
@@ -136,8 +161,8 @@ def make_base_exporter(users: UserStore, consents: ConsentStore) -> BaseExporter
 
 
 def make_json_exporter(users: UserStore, consents: ConsentStore) -> JsonExporter:
-    return JsonExporter(users, consents)
+    return JsonExporter(BaseExporter(users, consents))
 
 
 def make_gdpr_exporter(users: UserStore, consents: ConsentStore) -> GdprJsonExporter:
-    return GdprJsonExporter(users, consents)
+    return GdprJsonExporter(make_json_exporter(users, consents), users)
