@@ -22,9 +22,12 @@ class BaseExporter:
 
     def export(self, user_id: int) -> Any:
         self.validate_subject(user_id)
-        payload = self.build_payload(
-            self.load_profile(user_id), self.load_activities(user_id), self.load_consents(user_id)
-        )
+        bundle = {
+            "profile": self.load_profile(user_id),
+            "activities": self.load_activities(user_id),
+            "consents": self.load_consents(user_id),
+        }
+        payload = self.build_payload(bundle)
         self.audit(user_id)
         return self.serialize(payload)
 
@@ -48,8 +51,8 @@ class BaseExporter:
             for c in self._consents.list_for(user_id)
         ]
 
-    def build_payload(self, profile: Dict[str, Any], activities: List, consents: List) -> Dict[str, Any]:
-        return {"profile": profile, "activities": activities, "consents": consents}
+    def build_payload(self, bundle: Dict[str, Any]) -> Dict[str, Any]:
+        return dict(bundle)
 
     def serialize(self, payload: Dict[str, Any]) -> Any:
         return payload

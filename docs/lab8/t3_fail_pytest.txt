@@ -1,0 +1,16 @@
+﻿..F.FFF...                                                               [100%]
+================================== FAILURES ===================================
+E   TypeError: JsonExporter.build_payload() missing 2 required positional arguments: 'activities' and 'consents'
+D:\LearningEC\my_fastapi_app\services\privacy\exporters.py:30: TypeError: JsonExporter.build_payload() missing 2 required positional arguments: 'activities' and 'consents'
+E   TypeError: GdprJsonExporter.build_payload() missing 2 required positional arguments: 'activities' and 'consents'
+D:\LearningEC\my_fastapi_app\services\privacy\exporters.py:30: TypeError: GdprJsonExporter.build_payload() missing 2 required positional arguments: 'activities' and 'consents'
+E   TypeError: GdprJsonExporter.build_payload() missing 2 required positional arguments: 'activities' and 'consents'
+D:\LearningEC\my_fastapi_app\services\privacy\exporters.py:30: TypeError: GdprJsonExporter.build_payload() missing 2 required positional arguments: 'activities' and 'consents'
+E   TypeError: GdprJsonExporter.build_payload() missing 2 required positional arguments: 'activities' and 'consents'
+D:\LearningEC\my_fastapi_app\services\privacy\exporters.py:30: TypeError: GdprJsonExporter.build_payload() missing 2 required positional arguments: 'activities' and 'consents'
+=========================== short test summary info ===========================
+FAILED tests/test_exporters_hierarchy.py::test_json_exports_json_string_with_format_marker
+FAILED tests/test_exporters_hierarchy.py::test_gdpr_envelope_and_masked_phone
+FAILED tests/test_exporters_hierarchy.py::test_gdpr_output_is_sorted_and_not_ascii_escaped
+FAILED tests/test_exporters_hierarchy.py::test_gdpr_without_phone_stays_none
+4 failed, 6 passed in 0.05s

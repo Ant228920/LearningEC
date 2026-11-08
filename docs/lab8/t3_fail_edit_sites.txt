@@ -1,0 +1,7 @@
+﻿
+services\privacy\exporters.py:54:    def build_payload(self, bundle: Dict[str, Any]) -> Dict[str, Any]:
+services\privacy\exporters.py:73:    def build_payload(self, profile: Dict[str, Any], activities: List, consents: List) -> Dict[str, Any]:
+services\privacy\exporters.py:74:        payload = super().build_payload(profile, activities, consents)
+services\privacy\exporters.py:107:    def build_payload(self, profile: Dict[str, Any], activities: List, consents: List) -> Dict[str, Any]:
+
+
