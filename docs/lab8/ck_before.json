@@ -1,0 +1,852 @@
+{
+  "project": {
+    "classes": 24,
+    "methods": 29,
+    "attributes": 88,
+    "mhf": 0.0,
+    "ahf": 0.011,
+    "cof": 0.04,
+    "coupled_pairs": 22,
+    "mhf_percent": 0.0,
+    "ahf_percent": 1.1,
+    "cof_percent": 4.0
+  },
+  "files": {
+    "api/api.py": {
+      "module": {
+        "functions": 0,
+        "classes": 0,
+        "wmc_module": 0,
+        "cbo_module": 1,
+        "cbo_module_classes": [
+          "APIRouter"
+        ],
+        "ce": 1,
+        "ca": 1,
+        "instability": 0.5,
+        "imports_project": [
+          "api/v1/endpoints/currency.py"
+        ]
+      },
+      "classes": {}
+    },
+    "api/v1/endpoints/currency.py": {
+      "module": {
+        "functions": 1,
+        "classes": 0,
+        "wmc_module": 4,
+        "cbo_module": 6,
+        "cbo_module_classes": [
+          "APIRouter",
+          "CurrencyRepository",
+          "Depends",
+          "Query",
+          "RateRequest",
+          "Session"
+        ],
+        "ce": 4,
+        "ca": 1,
+        "instability": 0.8,
+        "imports_project": [
+          "core/resilience_service.py",
+          "db/session.py",
+          "repository/currency_repository.py",
+          "schemas/schema.py"
+        ]
+      },
+      "classes": {}
+    },
+    "api/v1/endpoints/privacy.py": {
+      "module": {
+        "functions": 6,
+        "classes": 2,
+        "wmc_module": 44,
+        "cbo_module": 20,
+        "cbo_module_classes": [
+          "APIRouter",
+          "AnonymizeResponse",
+          "Any",
+          "ConsentActionResponse",
+          "ConsentExport",
+          "ConsentPurpose",
+          "ConsentUpdateRequest",
+          "Depends",
+          "Dict",
+          "HTTPException",
+          "Header",
+          "List",
+          "MarketingCampaignRequest",
+          "PersonalDataExportResponse",
+          "Session",
+          "User",
+          "UserActivity",
+          "UserActivityExport",
+          "UserConsent",
+          "UserProfileExport"
+        ],
+        "ce": 3,
+        "ca": 1,
+        "instability": 0.75,
+        "imports_project": [
+          "db/session.py",
+          "models/users.py",
+          "schemas/privacy.py"
+        ]
+      },
+      "classes": {
+        "ConsentPolicyGate": {
+          "bases": [],
+          "methods": 1,
+          "wmc": 1,
+          "cbo": 3,
+          "cbo_project": 2,
+          "cbo_external": 1,
+          "cbo_classes": [
+            "ConsentPurpose",
+            "Session",
+            "UserConsent"
+          ],
+          "lcom4": 1,
+          "lcom_star": 0.0,
+          "dit": 1,
+          "rfc": 5,
+          "pim": 1,
+          "overridden": [],
+          "flags": []
+        },
+        "PrivacyManager": {
+          "bases": [],
+          "methods": 18,
+          "wmc": 37,
+          "cbo": 18,
+          "cbo_project": 13,
+          "cbo_external": 5,
+          "cbo_classes": [
+            "AnonymizeResponse",
+            "Any",
+            "ConsentActionResponse",
+            "ConsentExport",
+            "ConsentPolicyGate",
+            "ConsentPurpose",
+            "ConsentUpdateRequest",
+            "Dict",
+            "HTTPException",
+            "List",
+            "MarketingCampaignRequest",
+            "PersonalDataExportResponse",
+            "Session",
+            "User",
+            "UserActivity",
+            "UserActivityExport",
+            "UserConsent",
+            "UserProfileExport"
+          ],
+          "lcom4": 1,
+          "lcom_star": 0.945,
+          "dit": 1,
+          "rfc": 46,
+          "pim": 17,
+          "overridden": [],
+          "flags": [
+            "CBO>15",
+            "LCOM*->1"
+          ]
+        }
+      }
+    },
+    "core/config.py": {
+      "module": {
+        "functions": 0,
+        "classes": 1,
+        "wmc_module": 1,
+        "cbo_module": 2,
+        "cbo_module_classes": [
+          "BaseSettings",
+          "SettingsConfigDict"
+        ],
+        "ce": 0,
+        "ca": 1,
+        "instability": 0.0,
+        "imports_project": []
+      },
+      "classes": {
+        "Settings": {
+          "bases": [
+            "BaseSettings"
+          ],
+          "methods": 1,
+          "wmc": 1,
+          "cbo": 2,
+          "cbo_project": 0,
+          "cbo_external": 2,
+          "cbo_classes": [
+            "BaseSettings",
+            "SettingsConfigDict"
+          ],
+          "lcom4": 1,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 1,
+          "pim": 1,
+          "overridden": [],
+          "flags": []
+        }
+      }
+    },
+    "core/resilience_service.py": {
+      "module": {
+        "functions": 1,
+        "classes": 4,
+        "wmc_module": 18,
+        "cbo_module": 4,
+        "cbo_module_classes": [
+          "Callable",
+          "Mapping",
+          "MappingProxyType",
+          "NamedTuple"
+        ],
+        "ce": 0,
+        "ca": 1,
+        "instability": 0.0,
+        "imports_project": []
+      },
+      "classes": {
+        "RetriesExhausted": {
+          "bases": [
+            "Exception"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 0,
+          "cbo_project": 0,
+          "cbo_external": 0,
+          "cbo_classes": [],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        },
+        "RateResult": {
+          "bases": [
+            "NamedTuple"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 1,
+          "cbo_project": 0,
+          "cbo_external": 1,
+          "cbo_classes": [
+            "NamedTuple"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        },
+        "RateRequest": {
+          "bases": [],
+          "methods": 5,
+          "wmc": 7,
+          "cbo": 0,
+          "cbo_project": 0,
+          "cbo_external": 0,
+          "cbo_classes": [],
+          "lcom4": 1,
+          "lcom_star": 0.625,
+          "dit": 1,
+          "rfc": 12,
+          "pim": 4,
+          "overridden": [],
+          "flags": []
+        },
+        "RetryPolicy": {
+          "bases": [],
+          "methods": 4,
+          "wmc": 9,
+          "cbo": 2,
+          "cbo_project": 1,
+          "cbo_external": 1,
+          "cbo_classes": [
+            "Callable",
+            "RetriesExhausted"
+          ],
+          "lcom4": 1,
+          "lcom_star": 0.75,
+          "dit": 1,
+          "rfc": 15,
+          "pim": 3,
+          "overridden": [],
+          "flags": []
+        }
+      }
+    },
+    "core/secure_logger.py": {
+      "module": {
+        "functions": 6,
+        "classes": 1,
+        "wmc_module": 27,
+        "cbo_module": 1,
+        "cbo_module_classes": [
+          "Any"
+        ],
+        "ce": 0,
+        "ca": 1,
+        "instability": 0.0,
+        "imports_project": []
+      },
+      "classes": {
+        "PIISanitizingFilter": {
+          "bases": [
+            "Filter"
+          ],
+          "methods": 1,
+          "wmc": 9,
+          "cbo": 0,
+          "cbo_project": 0,
+          "cbo_external": 0,
+          "cbo_classes": [],
+          "lcom4": 1,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 6,
+          "pim": 1,
+          "overridden": [],
+          "flags": []
+        }
+      }
+    },
+    "db/session.py": {
+      "module": {
+        "functions": 1,
+        "classes": 0,
+        "wmc_module": 1,
+        "cbo_module": 0,
+        "cbo_module_classes": [],
+        "ce": 1,
+        "ca": 5,
+        "instability": 0.17,
+        "imports_project": [
+          "core/config.py"
+        ]
+      },
+      "classes": {}
+    },
+    "main.py": {
+      "module": {
+        "functions": 1,
+        "classes": 0,
+        "wmc_module": 1,
+        "cbo_module": 2,
+        "cbo_module_classes": [
+          "Base",
+          "FastAPI"
+        ],
+        "ce": 5,
+        "ca": 0,
+        "instability": 1.0,
+        "imports_project": [
+          "api/api.py",
+          "api/v1/endpoints/privacy.py",
+          "core/secure_logger.py",
+          "db/session.py",
+          "models/users.py"
+        ]
+      },
+      "classes": {}
+    },
+    "models/currency.py": {
+      "module": {
+        "functions": 0,
+        "classes": 1,
+        "wmc_module": 0,
+        "cbo_module": 5,
+        "cbo_module_classes": [
+          "Base",
+          "Column",
+          "Float",
+          "Integer",
+          "String"
+        ],
+        "ce": 1,
+        "ca": 1,
+        "instability": 0.5,
+        "imports_project": [
+          "db/session.py"
+        ]
+      },
+      "classes": {
+        "Currency": {
+          "bases": [
+            "Base"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 5,
+          "cbo_project": 0,
+          "cbo_external": 5,
+          "cbo_classes": [
+            "Base",
+            "Column",
+            "Float",
+            "Integer",
+            "String"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        }
+      }
+    },
+    "models/users.py": {
+      "module": {
+        "functions": 0,
+        "classes": 3,
+        "wmc_module": 0,
+        "cbo_module": 8,
+        "cbo_module_classes": [
+          "Base",
+          "Boolean",
+          "Column",
+          "DateTime",
+          "ForeignKey",
+          "Integer",
+          "String",
+          "Text"
+        ],
+        "ce": 1,
+        "ca": 2,
+        "instability": 0.33,
+        "imports_project": [
+          "db/session.py"
+        ]
+      },
+      "classes": {
+        "User": {
+          "bases": [
+            "Base"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 5,
+          "cbo_project": 0,
+          "cbo_external": 5,
+          "cbo_classes": [
+            "Base",
+            "Boolean",
+            "Column",
+            "Integer",
+            "String"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        },
+        "UserActivity": {
+          "bases": [
+            "Base"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 7,
+          "cbo_project": 0,
+          "cbo_external": 7,
+          "cbo_classes": [
+            "Base",
+            "Column",
+            "DateTime",
+            "ForeignKey",
+            "Integer",
+            "String",
+            "Text"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        },
+        "UserConsent": {
+          "bases": [
+            "Base"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 7,
+          "cbo_project": 0,
+          "cbo_external": 7,
+          "cbo_classes": [
+            "Base",
+            "Boolean",
+            "Column",
+            "DateTime",
+            "ForeignKey",
+            "Integer",
+            "String"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        }
+      }
+    },
+    "repository/currency_repository.py": {
+      "module": {
+        "functions": 0,
+        "classes": 1,
+        "wmc_module": 4,
+        "cbo_module": 2,
+        "cbo_module_classes": [
+          "Currency",
+          "Session"
+        ],
+        "ce": 1,
+        "ca": 1,
+        "instability": 0.5,
+        "imports_project": [
+          "models/currency.py"
+        ]
+      },
+      "classes": {
+        "CurrencyRepository": {
+          "bases": [],
+          "methods": 3,
+          "wmc": 4,
+          "cbo": 2,
+          "cbo_project": 1,
+          "cbo_external": 1,
+          "cbo_classes": [
+            "Currency",
+            "Session"
+          ],
+          "lcom4": 1,
+          "lcom_star": 0.0,
+          "dit": 1,
+          "rfc": 11,
+          "pim": 2,
+          "overridden": [],
+          "flags": []
+        }
+      }
+    },
+    "schemas/privacy.py": {
+      "module": {
+        "functions": 0,
+        "classes": 9,
+        "wmc_module": 0,
+        "cbo_module": 8,
+        "cbo_module_classes": [
+          "Any",
+          "BaseModel",
+          "ConfigDict",
+          "Dict",
+          "Enum",
+          "Field",
+          "List",
+          "Optional"
+        ],
+        "ce": 0,
+        "ca": 1,
+        "instability": 0.0,
+        "imports_project": []
+      },
+      "classes": {
+        "UserProfileExport": {
+          "bases": [
+            "BaseModel"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 2,
+          "cbo_project": 0,
+          "cbo_external": 2,
+          "cbo_classes": [
+            "BaseModel",
+            "Optional"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        },
+        "UserActivityExport": {
+          "bases": [
+            "BaseModel"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 3,
+          "cbo_project": 0,
+          "cbo_external": 3,
+          "cbo_classes": [
+            "Any",
+            "BaseModel",
+            "Dict"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        },
+        "ConsentExport": {
+          "bases": [
+            "BaseModel"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 1,
+          "cbo_project": 0,
+          "cbo_external": 1,
+          "cbo_classes": [
+            "BaseModel"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        },
+        "PersonalDataExportResponse": {
+          "bases": [
+            "BaseModel"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 7,
+          "cbo_project": 3,
+          "cbo_external": 4,
+          "cbo_classes": [
+            "BaseModel",
+            "ConfigDict",
+            "ConsentExport",
+            "Dict",
+            "List",
+            "UserActivityExport",
+            "UserProfileExport"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        },
+        "AnonymizeResponse": {
+          "bases": [
+            "BaseModel"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 1,
+          "cbo_project": 0,
+          "cbo_external": 1,
+          "cbo_classes": [
+            "BaseModel"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        },
+        "ConsentPurpose": {
+          "bases": [
+            "str",
+            "Enum"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 1,
+          "cbo_project": 0,
+          "cbo_external": 1,
+          "cbo_classes": [
+            "Enum"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        },
+        "ConsentUpdateRequest": {
+          "bases": [
+            "BaseModel"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 3,
+          "cbo_project": 1,
+          "cbo_external": 2,
+          "cbo_classes": [
+            "BaseModel",
+            "ConsentPurpose",
+            "Field"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        },
+        "ConsentActionResponse": {
+          "bases": [
+            "BaseModel"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 2,
+          "cbo_project": 1,
+          "cbo_external": 1,
+          "cbo_classes": [
+            "BaseModel",
+            "ConsentPurpose"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        },
+        "MarketingCampaignRequest": {
+          "bases": [
+            "BaseModel"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 1,
+          "cbo_project": 0,
+          "cbo_external": 1,
+          "cbo_classes": [
+            "BaseModel"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        }
+      }
+    },
+    "schemas/schema.py": {
+      "module": {
+        "functions": 0,
+        "classes": 2,
+        "wmc_module": 0,
+        "cbo_module": 1,
+        "cbo_module_classes": [
+          "BaseModel"
+        ],
+        "ce": 0,
+        "ca": 1,
+        "instability": 0.0,
+        "imports_project": []
+      },
+      "classes": {
+        "ConvertResponse": {
+          "bases": [
+            "BaseModel"
+          ],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 1,
+          "cbo_project": 0,
+          "cbo_external": 1,
+          "cbo_classes": [
+            "BaseModel"
+          ],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 2,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        },
+        "Config": {
+          "bases": [],
+          "methods": 0,
+          "wmc": 0,
+          "cbo": 0,
+          "cbo_project": 0,
+          "cbo_external": 0,
+          "cbo_classes": [],
+          "lcom4": 0,
+          "lcom_star": 0.0,
+          "dit": 1,
+          "rfc": 0,
+          "pim": 0,
+          "overridden": [],
+          "flags": []
+        }
+      }
+    },
+    "tools/coupling_matrix.py": {
+      "module": {
+        "functions": 4,
+        "classes": 0,
+        "wmc_module": 19,
+        "cbo_module": 1,
+        "cbo_module_classes": [
+          "Path"
+        ],
+        "ce": 0,
+        "ca": 0,
+        "instability": 0.0,
+        "imports_project": []
+      },
+      "classes": {}
+    },
+    "tools/list_vars.py": {
+      "module": {
+        "functions": 0,
+        "classes": 0,
+        "wmc_module": 0,
+        "cbo_module": 0,
+        "cbo_module_classes": [],
+        "ce": 0,
+        "ca": 0,
+        "instability": 0.0,
+        "imports_project": []
+      },
+      "classes": {}
+    }
+  }
+}
