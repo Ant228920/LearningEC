@@ -36,7 +36,7 @@ class UserConsent(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     purpose = Column(String(100), nullable=False)
-    is_granted = Column(Boolean, default=False, nullable=False)
+    granted = Column("is_granted", Boolean, default=False, nullable=False)
     policy_version = Column(String(20), default="v1.0")
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 

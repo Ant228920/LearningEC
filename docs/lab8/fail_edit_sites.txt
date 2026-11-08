@@ -1,0 +1,9 @@
+﻿
+api\v1\endpoints\privacy.py:38:                UserConsent.is_granted.is_(True),
+api\v1\endpoints\privacy.py:114:                purpose=c.purpose, is_granted=c.is_granted, policy_version=c.policy_version, updated_at=c.updated_at
+api\v1\endpoints\privacy.py:172:            c.is_granted = False
+api\v1\endpoints\privacy.py:196:            consent.is_granted = granted
+api\v1\endpoints\privacy.py:204:                is_granted=granted,
+api\v1\endpoints\privacy.py:217:            is_granted=consent.is_granted,
+
+
