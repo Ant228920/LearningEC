@@ -70,6 +70,7 @@ pytest
 | [docs/sdd.md](docs/sdd.md) | Архітектура: контейнери, компоненти, модель даних, API |
 | [docs/isd.md](docs/isd.md) | Інфраструктура: середовища, CI/CD, моніторинг, бекапи, RTO/RPO |
 | [docs/maintenance.md](docs/maintenance.md) | Регламент підтримки: власники, цикли перегляду, правило «зміна коду = зміна документації» |
+| [docs/handover.md](docs/handover.md) | Пакет передачі знань: реєстр документів, онбординг, Bus Factor |
 | [docs/architecture/adr/](docs/architecture/adr/) | Журнал архітектурних рішень |
 | [docs/audience-matrix.md](docs/audience-matrix.md) | Хто і де шукає відповіді |
 
