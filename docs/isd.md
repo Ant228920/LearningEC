@@ -21,6 +21,16 @@ flowchart LR
 
 Порядок підняття: `currency_db` (healthcheck `pg_isready`, інтервал 5 с, 5 спроб) → `currency_api` і `currency_cron` (`depends_on: service_healthy`). Контейнер `currency_api` не має власного healthcheck.
 
+### Залежності запуску
+
+Таблиця звіряється з `docker-compose.yml` скриптом `tools/doc_drift_check.py`; при зміні `depends_on` її треба оновити.
+
+| Сервіс | depends_on |
+|---|---|
+| currency_db | — |
+| currency_api | currency_db (service_healthy) |
+| currency_cron | currency_db (service_healthy) |
+
 ## currency_api
 
 Опис у SDD: [currency_api](sdd.md#31-currency_api--контейнер-застосунку), компоненти C1–C8.
@@ -127,8 +137,13 @@ flowchart LR
 | Цикломатична складність | pre-commit (`check_cc.py`, radon) | CC ≤ 10, інакше коміт заблоковано |
 | Секрети в коді | pre-commit (`gitleaks` v8.18.2) | знайдений секрет блокує коміт |
 | Артефакт звіту | CI, стадія 8 | відсутність звітів завалює збірку |
+| Синхронність документації з кодом | CI, `docs-drift.yml` | маршрути, сервіси й залежності запуску збігаються з SDD/ISD |
 
-Обмеження, зафіксовані чесно: конвеєр лише вимірює метрики, **не запускає тести** і **не розгортає** систему (CD відсутній). Gates складності й gitleaks працюють локально на pre-commit, у CI вони не продубльовані.
+### Другий конвеєр: Docs Drift Check
+
+Файл: `.github/workflows/docs-drift.yml`, тригери `push`, `pull_request`, `workflow_dispatch`. Запускає `python tools/doc_drift_check.py` на `ubuntu-latest` (Python 3.12). Це Quality Gate супроводу документації: збірка падає (код 1), якщо маршрут із коду відсутній у `docs/sdd.md`, сервіс із compose не має розділу в цьому файлі або залежності запуску розійшлися з таблицею вище.
+
+Обмеження, зафіксовані чесно: конвеєр складності лише вимірює метрики, **не запускає тести** і **не розгортає** систему (CD відсутній). Gates складності й gitleaks працюють локально на pre-commit, у CI вони не продубльовані.
 
 ## sonarqube
 
