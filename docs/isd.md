@@ -1,6 +1,6 @@
 # ISD — Infrastructure Specification Document
 
-**Система:** Currency Converter API · **Версія:** 1.0 · **Дата:** 2026-11-15 · **Власник:** автор репозиторію
+**Система:** Currency Converter API · **Версія:** 1.1 · **Дата:** 2026-11-15 · **Власник:** автор репозиторію
 **Пов'язані документи:** [SDD](sdd.md) · [ADR-0001](architecture/adr/0001-nbu-sync-via-cron-into-postgres.md) · [ADR-0002](architecture/adr/0002-retry-with-static-fallback.md)
 
 Позначки статусу: **[є]** — реалізовано в репозиторії; **[ціль]** — цільова вимога, ще не реалізована.
@@ -19,7 +19,7 @@ flowchart LR
     host(["Хост: 5424"]) -.->|"5424→5432"| db
 ```
 
-Порядок підняття: `currency_db` (healthcheck `pg_isready`, інтервал 5 с, 5 спроб) → `currency_api` і `currency_cron` (`depends_on: service_healthy`). Контейнер `currency_api` не має власного healthcheck.
+Порядок підняття: `currency_db` (healthcheck `pg_isready`, інтервал 5 с, 5 спроб) → `currency_api` (`depends_on: service_healthy`) → `currency_cron` (чекає `currency_db` у стані healthy та `currency_api` у стані started). Контейнер `currency_api` не має власного healthcheck, тому `service_started` означає лише «процес запущено».
 
 ### Залежності запуску
 
@@ -29,7 +29,7 @@ flowchart LR
 |---|---|
 | currency_db | — |
 | currency_api | currency_db (service_healthy) |
-| currency_cron | currency_db (service_healthy) |
+| currency_cron | currency_db (service_healthy), currency_api (service_started) |
 
 ## currency_api
 
@@ -68,6 +68,7 @@ flowchart LR
 |---|---|
 | Образ | той самий `python:3.10-slim` (збірка з `my_fastapi_app`) |
 | Команда | `apt-get install cron`, `crontab /etc/cron.d/currency-cron`, `cron -f` |
+| Залежності | `currency_db` (healthy), `currency_api` (started) |
 | Розклад | `0 3 * * *` — щодня о 03:00 за часом контейнера (UTC) |
 | Виконання | `cd /app && python -m scripts.sync_nbu >> /var/log/cron.log 2>&1` |
 | Файл розкладу | `my_fastapi_app/crontab`, змонтований у `/etc/cron.d/currency-cron`; порожній рядок наприкінці файлу обов'язковий |

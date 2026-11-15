@@ -28,6 +28,12 @@ curl "http://localhost:8000/api/v1/tasks/api/convert?amount=100&from_currency=US
 
 Відповідь містить `converted_amount`, `cross_rate` і `system_status` (`healthy` або `degraded_fallback`).
 
+Перелік валют, які є в базі (порожній, доки не відпрацює синхронізація):
+
+```bash
+curl "http://localhost:8000/api/v1/tasks/api/currencies"
+```
+
 Ручний запуск синхронізації курсів (за розкладом вона працює щодня о 03:00 в контейнері `currency_cron`):
 
 ```bash
@@ -49,6 +55,7 @@ pytest
 | Метод і шлях | Призначення |
 |---|---|
 | `GET /api/v1/tasks/api/convert` | Конвертація: `amount`, `from_currency`, `to_currency` |
+| `GET /api/v1/tasks/api/currencies` | Перелік валют, доступних у базі, з курсами |
 | `GET /api/v1/users/{id}/personal-data` | Експорт персональних даних (заголовок `X-User-Id`) |
 | `POST /api/v1/users/{id}/anonymize` | Анонімізація користувача |
 | `POST /api/v1/users/{id}/consents/grant` · `/revoke` | Керування згодами |
@@ -62,6 +69,7 @@ pytest
 |---|---|
 | [docs/sdd.md](docs/sdd.md) | Архітектура: контейнери, компоненти, модель даних, API |
 | [docs/isd.md](docs/isd.md) | Інфраструктура: середовища, CI/CD, моніторинг, бекапи, RTO/RPO |
+| [docs/maintenance.md](docs/maintenance.md) | Регламент підтримки: власники, цикли перегляду, правило «зміна коду = зміна документації» |
 | [docs/architecture/adr/](docs/architecture/adr/) | Журнал архітектурних рішень |
 | [docs/audience-matrix.md](docs/audience-matrix.md) | Хто і де шукає відповіді |
 

@@ -1,7 +1,7 @@
 # SDD — System Design Document
 
 **Система:** Currency Converter API (`my_fastapi_app/`)
-**Версія документа:** 1.0 · **Дата:** 2026-11-15 · **Власник:** автор репозиторію
+**Версія документа:** 1.1 · **Дата:** 2026-11-15 · **Власник:** автор репозиторію
 **Пов'язані документи:** [ISD](isd.md) · [ADR-0001](architecture/adr/0001-nbu-sync-via-cron-into-postgres.md) · [ADR-0002](architecture/adr/0002-retry-with-static-fallback.md)
 
 ## 1. Призначення та межі системи
@@ -55,11 +55,11 @@ flowchart TB
 | Підкомпонент | Відповідальність | Ключові залежності | Взаємодіє з |
 |---|---|---|---|
 | **C1. Router (`api/api.py`)** | Збирає роутери версії API | FastAPI | C2 |
-| **C2. Currency Endpoint (`api/v1/endpoints/currency.py`)** | Валідація запиту, обчислення крос-курсу, статус `healthy`/`degraded_fallback` | C6, C4, C7 | C1, C4, C6, C7, зовнішній Upstream |
+| **C2. Currency Endpoint (`api/v1/endpoints/currency.py`)** | Валідація запиту, обчислення крос-курсу, статус `healthy`/`degraded_fallback`; перелік доступних валют (`/api/currencies`) | C6, C4, C7 | C1, C4, C6, C7, зовнішній Upstream |
 | **C3. Privacy Module (`api/v1/endpoints/privacy.py`, `schemas/privacy.py`)** | Експорт даних (GDPR ст. 15), анонімізація, grant/revoke згод, Policy Gate для маркетингу | C7, `models/users.py` | C5, C7 |
 | **C4. Resilience Service (`core/resilience_service.py`)** | `RateRequest`, `RetryPolicy` (3 спроби, backoff 0.1/0.2 с, таймаут 0.4 с), таблиця `FALLBACK_RATES` | httpx | C2, Upstream |
 | **C5. Secure Logger (`core/secure_logger.py`)** | Фільтр, що маскує email, телефони, токени й паролі в логах | logging | C3, C2 та інші модулі, що логують |
-| **C6. CurrencyRepository (`repository/currency_repository.py`)** | `get_by_code`, `upsert_currencies` | C7, SQLAlchemy | C2, C9 |
+| **C6. CurrencyRepository (`repository/currency_repository.py`)** | `get_by_code`, `list_all`, `upsert_currencies` | C7, SQLAlchemy | C2, C9 |
 | **C7. Persistence (`db/session.py`, `models/*`)** | Engine, сесії (`get_db`), ORM-моделі | C8, SQLAlchemy | C2, C3, C6, C10 |
 | **C8. Config (`core/config.py`)** | Читає `DB_*` із середовища/`.env` (pydantic-settings) | pydantic-settings | C7 |
 
@@ -122,6 +122,7 @@ erDiagram
 | Метод і шлях | Вхід | Відповідь | Коди | Компонент |
 |---|---|---|---|---|
 | `GET /api/v1/tasks/api/convert` | query: `amount` > 0, `from_currency` (3 символи), `to_currency` (3 символи) | `{from_currency, to_currency, amount, converted_amount, cross_rate, system_status}` | 200, 422 | C2 |
+| `GET /api/v1/tasks/api/currencies` | — | масив `[{code, name, symbol, rate}]`, відсортований за `code`; порожній масив, якщо база ще не заповнена | 200 | C2 |
 | `GET /api/v1/users/{user_id}/personal-data` | header `X-User-Id` | `PersonalDataExportResponse` (профіль, активність, згоди) | 200, 403, 404 | C3 |
 | `POST /api/v1/users/{user_id}/anonymize` | header `X-User-Id` | `{status, message, user_id, anonymized_at}`, ідемпотентно | 200, 403, 404, 500 | C3 |
 | `POST /api/v1/users/{user_id}/consents/grant` | header + `{purpose, policy_version}` | `ConsentActionResponse` | 200, 403, 422 | C3 |
@@ -138,7 +139,7 @@ erDiagram
 | Запит курсу до провайдера | C4 → Upstream | `GET {UPSTREAM_PROVIDER_URL}?code=XXX` → `{"rate": <float>}`; таймаут 0.4 с, connect 0.2 с, 3 спроби |
 | Завантаження курсів НБУ | C9 → НБУ | `GET https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json` → масив `{cc, txt, rate}`; таймаут 10 с |
 | Запуск синхронізації | cron → C9 | `python -m scripts.sync_nbu`, exit code 0 / 1 |
-| Доступ до даних | C2, C9 → C6 | `get_by_code(code) -> Currency \| None`, `upsert_currencies(list[dict])` |
+| Доступ до даних | C2, C9 → C6 | `get_by_code(code) -> Currency \| None`, `list_all() -> list[Currency]`, `upsert_currencies(list[dict])` |
 
 ## 6. Відомі розбіжності й технічний борг
 
