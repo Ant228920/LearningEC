@@ -1,0 +1,2 @@
+0 3 * * * root cd /app && /usr/local/bin/python -m scripts.sync_nbu >> /var/log/cron.log 2>&1
+# Порожній рядок у кінці обов'язковий!

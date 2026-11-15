@@ -1,0 +1,53 @@
+name: Complexity & Hotspots Audit
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  complexity-audit:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.12
+
+    steps:
+      - name: Checkout (повна історія для Git churn)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Allow git inside container
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install complexity scanners
+        run: pip install --no-cache-dir radon lizard
+
+      - name: Scan whole repository (JSON + CSV)
+        run: |
+          mkdir -p reports
+          radon cc -s -j . > reports/radon-cc.json
+          lizard . --csv > reports/lizard.csv
+
+      - name: Collect Git churn (last 90 days)
+        run: |
+          git log --since="90 days ago" --format=format: --name-only \
+            | grep -v '^$' | sort | uniq -c | sort -nr > reports/churn-90d.txt
+          echo "Top-10 most changed files:"
+          head -10 reports/churn-90d.txt
+
+      - name: Build Hotspots matrix
+        run: python tools/hotspots.py --cc reports/radon-cc.json --churn reports/churn-90d.txt --out reports
+
+      - name: Publish matrix to job summary
+        run: cat reports/hotspots.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report as build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: complexity-and-hotspots-report
+          path: reports/
+          if-no-files-found: error
