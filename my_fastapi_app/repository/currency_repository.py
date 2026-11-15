@@ -9,6 +9,9 @@ class CurrencyRepository:
     def get_by_code(self, code: str) -> Currency | None:
         return self._db.query(Currency).filter(Currency.code == code).first()
 
+    def list_all(self) -> list[Currency]:
+        return self._db.query(Currency).order_by(Currency.code).all()
+
     def upsert_currencies(self, currencies_data: list[dict]) -> None:
         if not currencies_data:
             return

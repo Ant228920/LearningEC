@@ -38,6 +38,8 @@ services:
     depends_on:
       currency_db:
         condition: service_healthy
+      currency_api:
+        condition: service_started
     command: >
       bash -c "apt-get update && apt-get install -y cron 
       && chmod 0644 /etc/cron.d/currency-cron 

@@ -10,6 +10,15 @@ router = APIRouter()
 
 UPSTREAM_PROVIDER_URL = os.getenv("UPSTREAM_PROVIDER_URL", "http://localhost:9999/api/rate")
 
+@router.get("/api/currencies")
+def list_currencies(db: Session = Depends(get_db)):
+    repo = CurrencyRepository(db)
+    return [
+        {"code": c.code, "name": c.name, "symbol": c.symbol, "rate": float(c.rate)}
+        for c in repo.list_all()
+    ]
+
+
 @router.get("/api/convert")
 def convert_currency(
         amount: float = Query(..., gt=0, description="Сума для конвертації"),
